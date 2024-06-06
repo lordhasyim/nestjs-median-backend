@@ -1,27 +1,37 @@
 import { PrismaClient } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
+const roundOfHashing = 10;
 
 async function main() {
+
+  const passwordUserOne = await bcrypt.hash('password-ronaldo', roundOfHashing);
+  const passwordUserTwo = await bcrypt.hash('password-linud', roundOfHashing);
+
 
   // create two dummy users
   const user1 = await prisma.user.upsert({
     where: { email: 'ronaldo@cr7.com' },
-    update: {},
+    update: {
+      password: passwordUserOne
+    },
     create: {
       email: 'ronaldo@cr7.com',
       name: 'ronaldo cr7',
-      password: 'password-ronaldo',
+      password: passwordUserOne,
     },
   });
 
   const user2 = await prisma.user.upsert({
     where: { email: 'linus@torvalds.com' },
-    update: {},
+    update: {
+      password: passwordUserTwo
+    },
     create: {
       email: 'linus@torvalds.com',
       name: 'linus torvalds',
-      password: 'password-linus',
+      password: passwordUserTwo,
     },
   });
 

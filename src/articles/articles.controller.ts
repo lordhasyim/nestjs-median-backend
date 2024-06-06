@@ -15,7 +15,7 @@ export class ArticlesController {
   async create(@Body() createArticleDto: CreateArticleDto) {
     // return this.articlesService.create(createArticleDto);
     return new ArticleEntity(
-      await this.articlesService.create(createArticleDto);
+      await this.articlesService.create(createArticleDto)
     );
   }
 
