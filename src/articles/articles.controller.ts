@@ -1,14 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, NotFoundException, Inject } from '@nestjs/common';
 import { ArticlesService } from './articles.service';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { ArticleEntity } from './entities/article.entity';
+import { aql, Database } from 'arangojs';
 
 @Controller('articles')
 @ApiTags('articles')
 export class ArticlesController {
-  constructor(private readonly articlesService: ArticlesService) {}
+  constructor(@Inject('ARANGODB') private readonly db: Database ,  private readonly articlesService: ArticlesService) {}
 
   @Post()
   @ApiCreatedResponse({ type: ArticleEntity })
@@ -25,6 +26,26 @@ export class ArticlesController {
     // return this.articlesService.findAll();
     const articles = await this.articlesService.findAll();
     return articles.map((article) => new ArticleEntity(article));
+  }
+
+  // arango
+  @Get("test")
+  async test() {
+    let articles = await this.db.query(aql 
+      `FOR a IN articles return a`
+    );
+
+    // console.log(articles);
+    for await (const article of articles) {
+      // return article.title;
+      return JSON.stringify(article.title);
+
+    }
+
+    // console.log(articles);
+
+    // return JSON.stringify(articles)
+    return articles;
   }
 
   @Get('drafts')
@@ -69,4 +90,7 @@ export class ArticlesController {
       await this.articlesService.remove(id)
     );
   }
+
+
+
 }
